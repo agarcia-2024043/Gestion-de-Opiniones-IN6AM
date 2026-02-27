@@ -1,4 +1,4 @@
-# 🗣️ Gestor de Opiniones — Laboratorio #2
+#  Gestor de Opiniones — Laboratorio #2
 
 API REST para un sistema de gestión de opiniones con autenticación JWT, construida con **Node.js + Express + MongoDB**.
 
@@ -32,7 +32,7 @@ Authorization: Bearer <token>
 
 ---
 
-## 🛣️ Endpoints
+## Endpoints
 
 ### Auth `/api/auth`
 
@@ -84,7 +84,7 @@ Authorization: Bearer <token>
 
 ---
 
-## 🧪 Ejemplo de uso con curl
+##  Ejemplo de uso con curl
 
 ```bash
 # Registrar usuario
