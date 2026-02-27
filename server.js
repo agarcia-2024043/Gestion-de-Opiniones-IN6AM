@@ -8,6 +8,8 @@ const connectDB = require('./config/database');
 
 const authRoutes = require('./routes/auth');
 const postRoutes = require('./routes/posts');
+const commentRoutes = require('./routes/comments');
+const errorHandler = require('./middleware/errorHandler');
 
 // 1. INICIALIZAR LA APP PRIMERO (Para evitar el ReferenceError)
 const app = express();
@@ -68,11 +70,15 @@ app.get('/', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api/posts/:postId/comments', commentRoutes)
+
 
 // 6. Manejo de 404 y Errores (Mantén tus validaciones de Mongoose abajo)
 app.use((req, res) => {
   res.status(404).json({ success: false, message: `Ruta ${req.originalUrl} no encontrada.` });
 });
+
+app.use(errorHandler);
 
 // ... (Aquí sigue tu bloque de err, req, res, next que ya tienes)
 
