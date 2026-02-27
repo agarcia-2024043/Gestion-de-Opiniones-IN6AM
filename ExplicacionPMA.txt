@@ -1,0 +1,25 @@
+GESTOR DE OPINIONES - LABORATORIO #2
+
+
+Este proyecto es una API REST hecha en Node.js con Express y MongoDB. Permite a los
+usuarios registrarse, publicar opiniones y comentar en las publicaciones de otros,
+similar a las publicaciones de Facebook pero solo Backend.
+
+LO QUE HICE
+
+Dividí el proyecto en tres partes:
+
+Primero trabajé la autenticación: registro, login (con correo o username), encriptación
+de contraseñas con bcrypt y generación de tokens JWT. También hice la gestión de perfil
+y el middleware que protege las rutas privadas.
+
+Luego hice las publicaciones: crear, listar, ver por ID, editar y eliminar. Solo el autor
+puede editar o eliminar sus propias publicaciones.
+
+Por último agregué los comentarios con las mismas reglas, y un middleware global que
+maneja todos los errores de la aplicación de forma centralizada.
+
+SEGURIDAD
+
+Usé helmet para headers HTTP, rate limiting para evitar fuerza bruta, validaciones en
+todas las rutas y verificación de propietario en cada edición o eliminación.
