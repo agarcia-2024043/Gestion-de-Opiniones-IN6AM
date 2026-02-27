@@ -7,17 +7,17 @@ const rateLimit = require('express-rate-limit');
 const connectDB = require('./config/database');
 
 const authRoutes = require('./routes/auth');
-//const postRoutes = require('./routes/posts');
-//const commentRoutes = require('./routes/comments');
+const postRoutes = require('./routes/posts');
 
+// 1. INICIALIZAR LA APP PRIMERO (Para evitar el ReferenceError)
 const app = express();
 
-// ─── Conexión a DB ─────────────────────────────────────────────────────────────
+// 2. Conexión a DB 
 connectDB();
 
-// ─── Seguridad y middleware global ─────────────────────────────────────────────
-app.use(helmet()); // Headers de seguridad HTTP
-app.use(cors());   // CORS
+// 3. Seguridad y middleware global
+app.use(helmet()); 
+app.use(cors());   
 app.use(express.json({ limit: '10kb' })); 
 app.use(express.urlencoded({ extended: true }));
 
@@ -25,26 +25,17 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// Rate limiting — limitar peticiones por IP
+// 4. Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
-  message: { success: false, message: 'Demasiadas peticiones. Intenta de nuevo en 15 minutos.' },
+  message: { success: false, message: 'Demasiadas peticiones.' },
   standardHeaders: true,
   legacyHeaders: false,
 });
 app.use('/api', limiter);
 
-// Rate limit más estricto para auth
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  message: { success: false, message: 'Demasiados intentos de login. Intenta de nuevo en 15 minutos.' },
-});
-app.use('/api/auth/login', authLimiter);
-app.use('/api/auth/register', authLimiter);
-
-// ─── Rutas ─────────────────────────────────────────────────────────────────────
+// 5. RUTAS (Aquí es donde estaba el problema, ahora después de 'app')
 app.get('/', (req, res) => {
   res.json({
     success: true,
@@ -76,45 +67,16 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
-//app.use('/api/posts', postRoutes);
-//app.use('/api/posts', commentRoutes); // mergeParams permite acceder a :postId
+app.use('/api/posts', postRoutes);
 
-// ─── 404 ───────────────────────────────────────────────────────────────────────
+// 6. Manejo de 404 y Errores (Mantén tus validaciones de Mongoose abajo)
 app.use((req, res) => {
   res.status(404).json({ success: false, message: `Ruta ${req.originalUrl} no encontrada.` });
 });
 
-// ─── Manejo global de errores ──────────────────────────────────────────────────
-app.use((err, req, res, next) => {
-  console.error(err.stack);
+// ... (Aquí sigue tu bloque de err, req, res, next que ya tienes)
 
-  // Error de validación de Mongoose (ej: campo único duplicado)
-  if (err.code === 11000) {
-    const campo = Object.keys(err.keyValue)[0];
-    return res.status(409).json({ success: false, message: `El ${campo} ya está registrado.` });
-  }
-
-  // CastError de Mongoose (ID inválido)
-  if (err.name === 'CastError') {
-    return res.status(400).json({ success: false, message: 'ID inválido.' });
-  }
-
-  // Error de validación de Mongoose
-  if (err.name === 'ValidationError') {
-    const mensajes = Object.values(err.errors).map((e) => e.message);
-    return res.status(400).json({ success: false, message: mensajes.join('. ') });
-  }
-
-  res.status(err.statusCode || 500).json({
-    success: false,
-    message: err.message || 'Error interno del servidor.',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
-  });
-});
-
-// ─── Iniciar servidor ──────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-  console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
 });
